@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kiểm Tra Tốc Độ Mạng! 🇻🇳</title>
+<style>
+:root{
+  --bg1:#0f0c29; --bg2:#302b63; --bg3:#24243e;
+  --glass:rgba(255,255,255,.07);
+  --glass-b:rgba(255,255,255,.15);
+  --text:#fff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:"Segoe UI",Arial,sans-serif;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+  background-size:300% 300%;
+  animation:bgFlow 14s ease infinite;
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+@keyframes bgFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+/* ---------- trang trí nền ---------- */
+.blob{position:fixed;border-radius:50%;filter:blur(90px);opacity:.35;z-index:0;pointer-events:none;will-change:transform}
+.blob.b1{width:340px;height:340px;background:#ff2d78;top:-80px;left:-80px;animation:drift1 16s ease-in-out infinite}
+.blob.b2{width:300px;height:300px;background:#00c6ff;bottom:-60px;right:-60px;animation:drift2 18s ease-in-out infinite}
+.blob.b3{width:260px;height:260px;background:#a18cd1;bottom:-40px;left:30%;animation:drift1 20s ease-in-out infinite}
+@keyframes drift1{50%{transform:translate(60px,40px) scale(1.15)}}
+@keyframes drift2{50%{transform:translate(-50px,-50px) scale(1.1)}}
+
+.wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:28px 16px 60px;text-align:center}
+
+/* ---------- header ---------- */
+h1{
+  font-size:clamp(1.7rem,5vw,2.6rem);letter-spacing:1px;
+  background:linear-gradient(90deg,#ff9966,#ff5e62,#24c6dc,#a18cd1);
+  background-size:300% auto;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:shine 6s linear infinite;
+  margin-bottom:10px;
+}
+@keyframes shine{to{background-position:300% center}}
+.subtitle{font-size:.95rem;opacity:.85;margin-bottom:18px;line-height:1.5}
+
+/* ---------- đồng hồ real-time VN ---------- */
+.clock{
+  display:inline-block;padding:10px 26px;border-radius:999px;
+  background:var(--glass);border:1px solid var(--glass-b);
+  backdrop-filter:blur(10px);font-variant-numeric:tabular-nums;
+  font-size:1.05rem;box-shadow:0 4px 24px rgba(0,0,0,.3);margin-bottom:22px;
+}
+.clock .flag{font-size:1.15rem;margin-right:8px}
+.clock .date{opacity:.75;font-size:.85rem;margin-left:10px}
+
+/* ---------- vòng xoay ---------- */
+.ring-wrap{position:relative;width:270px;height:270px;margin:14px auto 8px}
+.ring{
+  position:absolute;inset:0;border-radius:50%;will-change:transform;
+  background:conic-gradient(from 0deg,transparent 0 12%,rgba(140,140,140,.55) 30%,rgba(140,140,140,.15) 55%,transparent 70%);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 18px),#000 calc(100% - 17px));
+  mask:radial-gradient(farthest-side,transparent calc(100% - 18px),#000 calc(100% - 17px));
+  animation:spin 1.6s linear infinite paused;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.core{
+  position:absolute;inset:34px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.14),rgba(0,0,0,.45));
+  border:1px solid var(--glass-b);backdrop-filter:blur(8px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  transition:box-shadow .5s,border-color .5s;
+}
+.core .mb{font-size:3rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.core .unit{font-size:.85rem;opacity:.7;margin-top:2px}
+.status{margin-top:6px;font-size:.95rem;font-weight:700;padding:4px 14px;border-radius:999px;
+  background:rgba(255,255,255,.08);transition:all .4s;min-height:28px}
+
+/* ---------- thông tin nhà mạng ---------- */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px 0}
+.card{
+  background:var(--glass);border:1px solid var(--glass-b);border-radius:16px;
+  padding:14px 10px;backdrop-filter:blur(10px);transition:transform .3s,box-shadow .3s;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(0,0,0,.3)}
+.card .label{font-size:.72rem;opacity:.65;text-transform:uppercase;letter-spacing:1px}
+.card .val{font-size:1.05rem;font-weight:700;margin-top:5px}
+
+/* ---------- nút ---------- */
+.btn{
+  cursor:pointer;border:none;border-radius:999px;padding:15px 48px;
+  font-size:1.05rem;font-weight:800;color:#fff;letter-spacing:.5px;
+  background:linear-gradient(135deg,#ff416c,#ff4b2b);background-size:200% auto;
+  box-shadow:0 8px 25px rgba(255,65,108,.45);transition:transform .25s,background .4s;
+  will-change:transform;
+}
+.btn:hover{transform:scale(1.06);background-position:right center}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.55;cursor:wait;transform:none}
+
+.note{font-size:.78rem;opacity:.55;margin-top:16px;line-height:1.6}
+
+/* ---------- popup kết quả ---------- */
+.popup{
+  position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
+  opacity:0;pointer-events:none;transition:opacity .35s;
+}
+.popup.show{opacity:1;pointer-events:auto}
+.popup-box{
+  width:min(90%,380px);padding:32px 26px;border-radius:24px;text-align:center;
+  background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.04));
+  border:1px solid var(--glass-b);backdrop-filter:blur(16px);
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+  transform:scale(.7) translateY(30px);transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+}
+.popup.show .popup-box{transform:scale(1) translateY(0)}
+.popup-emoji{font-size:3.4rem;line-height:1;animation:bounceIn .6s .1s both}
+@keyframes bounceIn{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+.popup-title{font-size:1.35rem;font-weight:800;margin:12px 0 8px}
+.popup-speed{font-size:1rem;opacity:.85;margin-bottom:6px}
+.popup-speed b{font-size:1.3rem}
+.popup-desc{font-size:.9rem;opacity:.8;line-height:1.55;margin-bottom:20px}
+.popup-close{
+  cursor:pointer;border:none;border-radius:999px;padding:12px 36px;
+  font-size:.95rem;font-weight:700;color:#fff;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  box-shadow:0 6px 20px rgba(102,126,234,.5);transition:transform .25s;
+}
+.popup-close:hover{transform:scale(1.06)}
+.popup-box.strong{border-color:rgba(255,90,90,.7);box-shadow:0 0 50px rgba(255,60,60,.4),0 20px 60px rgba(0,0,0,.5)}
+.popup-box.normal{border-color:rgba(90,200,255,.7);box-shadow:0 0 50px rgba(0,180,255,.35),0 20px 60px rgba(0,0,0,.5)}
+.popup-box.weak{border-color:rgba(200,200,200,.4);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+
+/* ---------- confetti ---------- */
+.confetti{position:fixed;top:-12px;width:10px;height:14px;z-index:51;border-radius:2px;
+  animation:fall linear forwards;pointer-events:none}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+footer{margin-top:44px;font-size:.85rem;line-height:1.9;opacity:.9}
+footer .flag{font-size:1.1rem}
+footer b{background:linear-gradient(90deg,#ffd86f,#fc6262);-webkit-background-clip:text;background-clip:text;color:transparent}
+.footline{font-size:.75rem;opacity:.65;margin-top:6px}
+@media (max-width:480px){.clock .date{display:block;margin:4px 0 0}}
+</style>
+<base target="_blank">
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<div class="wrap">
+  <h1>⚡ KIỂM TRA TỐC ĐỘ MẠNG! ⚡</h1>
+  <p class="subtitle">Trang web này được thiết kế ra để kiểm tra tốc độ mạng,<br>đo lường thật 100% – nhanh, chính xác và hoàn toàn miễn phí! 🚀</p>
+
+  <div class="clock"><span class="flag">🇻🇳</span><span id="clockTime">--:--:--</span><span class="date" id="clockDate">...</span></div>
+
+  <div class="ring-wrap">
+    <div class="ring" id="ring"></div>
+    <div class="core" id="core">
+      <div class="mb" id="speedVal">0</div>
+      <div class="unit">Mbps</div>
+      <div class="status" id="status">Sẵn sàng ✨</div>
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div class="card"><div class="label">Loại kết nối</div><div class="val" id="netType">Đang dò...</div></div>
+    <div class="card"><div class="label">Nhà mạng</div><div class="val" id="isp">Đang dò...</div></div>
+    <div class="card"><div class="label">Ping</div><div class="val" id="pingVal">-- ms</div></div>
+    <div class="card"><div class="label">Chất lượng</div><div class="val" id="quality">--</div></div>
+  </div>
+
+  <button class="btn" id="btnTest">🚀 BẮT ĐẦU KIỂM TRA</button>
+
+  <p class="note">ℹ️ Kết quả phụ thuộc vào tải máy chủ và thiết bị của bạn.<br>Để kết quả chính xác nhất, hãy đóng các ứng dụng/Tab đang tải dữ liệu nặng.</p>
+
+  <footer>
+    <div><span class="flag">🇻🇳</span> Made in VN <span class="flag">🇻🇳</span> Made by : <b>Nguyễn Chí Dự</b> 🇻🇳✨🇻🇳</div>
+    <div class="footline">© Bản quyền thuộc về : Nguyễn Chí Dự - HRGBVNG</div>
+  </footer>
+</div>
+
+<!-- POPUP KẾT QUẢ -->
+<div class="popup" id="popup">
+  <div class="popup-box" id="popupBox">
+    <div class="popup-emoji" id="popupEmoji">🎉</div>
+    <div class="popup-title" id="popupTitle">Chúc mừng!</div>
+    <div class="popup-speed">Tốc độ của bạn: <b id="popupSpeed">0</b> Mbps</div>
+    <div class="popup-desc" id="popupDesc">...</div>
+    <button class="popup-close" id="popupClose">OK 👌</button>
+  </div>
+</div>
+
+<script>
+/* ============ ĐỒNG HỒ REAL-TIME VN ============ */
+function updateClock(){
+  const now = new Date();
+  const t = now.toLocaleTimeString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour12:false});
+  const d = now.toLocaleDateString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('clockTime').textContent = t;
+  document.getElementById('clockDate').textContent = d;
+}
+updateClock(); setInterval(updateClock,1000);
+
+/* ============ NHẬN DIỆN LOẠI MẠNG / NHÀ MẠNG ============ */
+const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+function detectType(){
+  if(!conn) return 'Không xác định';
+  const t = conn.type || '';
+  if(t === 'wifi') return '📶 WiFi';
+  if(t === 'cellular') return '📱 Mạng di động';
+  const eff = conn.effectiveType || '';
+  if(['slow-2g','2g'].includes(eff)) return '📱 Mạng di động';
+  return '📶 WiFi / Cáp quang';
+}
+async function detectISP(){
+  const apis = [
+    {url:'https://ipapi.co/json/',        get:j=>j.org||j.isp},
+    {url:'https://ipwho.is/',             get:j=>j.connection?.isp||j.isp},
+    {url:'https://ipinfo.io/json',        get:j=>j.org||j.isp},
+    {url:'https://api.ip.sb/geoip',       get:j=>j.isp||j.organization},
+    {url:'https://ip-api.com/json/?fields=isp,org', get:j=>j.isp||j.org}
+  ];
+  for(const api of apis){
+    try{
+      const r = await fetch(api.url,{signal:AbortSignal.timeout(5000)});
+      const j = await r.json();
+      const isp = api.get(j);
+      if(isp) return isp;
+    }catch(e){ /* thử API tiếp theo */ }
+  }
+  return 'Không xác định';
+}
+document.getElementById('netType').textContent = detectType();
+(async()=>{
+  document.getElementById('isp').textContent = '⏳ Đang dò...';
+  const v = await detectISP();
+  document.getElementById('isp').textContent = v;
+})();
+if(conn && conn.addEventListener){
+  conn.addEventListener('change',()=>document.getElementById('netType').textContent=detectType());
+}
+
+/* ============ HỆ THỐNG KIỂM TRA THẬT ============ */
+const ring = document.getElementById('ring'),
+      core = document.getElementById('core'),
+      speedVal = document.getElementById('speedVal'),
+      statusEl = document.getElementById('status'),
+      pingEl = document.getElementById('pingVal'),
+      qualEl = document.getElementById('quality'),
+      btn = document.getElementById('btnTest');
+
+const popup = document.getElementById('popup'),
+      popupBox = document.getElementById('popupBox'),
+      popupEmoji = document.getElementById('popupEmoji'),
+      popupTitle = document.getElementById('popupTitle'),
+      popupSpeed = document.getElementById('popupSpeed'),
+      popupDesc = document.getElementById('popupDesc'),
+      popupClose = document.getElementById('popupClose');
+
+const TEST_IMG = 'https://speed.cloudflare.com/__down?bytes=3000000';
+
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+async function measurePing(){
+  let best = Infinity;
+  for(let i=0;i<3;i++){
+    try{
+      const s = performance.now();
+      await fetch('https://www.gstatic.com/generate_204',{cache:'no-store',mode:'no-cors',signal:AbortSignal.timeout(6000)});
+      const ms = performance.now()-s;
+      best = Math.min(best, Math.round(ms));
+    }catch(e){}
+  }
+  return best===Infinity ? '--' : best;
+}
+
+async function measureDownload(onProgress){
+  const results = [];
+  for(let i=0;i<3;i++){
+    const s = performance.now();
+    await fetch(TEST_IMG + '&r=' + Math.random(), {cache:'no-store',signal:AbortSignal.timeout(30000)});
+    const sec = (performance.now()-s)/1000;
+    const mbps = (3*8)/sec;
+    results.push(mbps);
+    onProgress?.(mbps, i);
+  }
+  results.sort((a,b)=>a-b);
+  return results[1];
+}
+
+function animateSpeed(target, dur=1200){
+  const start = parseFloat(speedVal.textContent)||0, t0 = performance.now();
+  function step(t){
+    const p = Math.min((t-t0)/dur,1);
+    const ease = 1-Math.pow(1-p,3);
+    speedVal.textContent = (start+(target-start)*ease).toFixed(1);
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function classify(mbps){
+  if(mbps >= 50) return {cls:'strong', label:'MẠNH 🔥', color:'#ff3b3b', emoji:'🎉',
+    title:'CHÚC MỪNG! MẠNG CỰC MẠNH! 🚀',
+    desc:'Bạn có đường truyền xuất sắc! Xem 4K, chơi game, livestream mượt mà không lo lag. Tận hưởng thôi! 😎'};
+  if(mbps >= 10) return {cls:'normal', label:'BÌNH THƯỜNG 😊', color:'#00c6ff', emoji:'👍',
+    title:'MẠNG ỔN ĐỊNH! ✅',
+    desc:'Tốc độ khá ổn cho lướt web, xem video và làm việc hằng ngày. Vẫn dùng tốt! 💪'};
+  return {cls:'weak', label:'YẾU ⚠️', color:'#9e9e9e', emoji:'😢',
+    title:'TIẾC QUÁ! MẠNG ĐANG YẾU...',
+    desc:'Tốc độ hơi chậm. Hãy thử gần lại router, tắt app nền hoặc liên hệ nhà mạng để được hỗ trợ nha! 📞'};
+}
+
+function applyClass(c){
+  if(c.cls==='strong'){
+    ring.style.background = 'conic-gradient(from 0deg,transparent 0 10%,#ff1e1e 25%,#ff8a3b 45%,transparent 70%)';
+    core.style.boxShadow = 'inset 0 0 40px rgba(255,40,40,.45),0 0 45px rgba(255,60,60,.55)';
+    core.style.borderColor = 'rgba(255,90,90,.7)';
+  }else if(c.cls==='normal'){
+    ring.style.background = 'conic-gradient(from 0deg,transparent 0 10%,#00c6ff 25%,#42e2ff 45%,transparent 70%)';
+    core.style.boxShadow = 'inset 0 0 40px rgba(0,180,255,.4),0 0 40px rgba(0,180,255,.45)';
+    core.style.borderColor = 'rgba(90,200,255,.7)';
+  }else{
+    ring.style.background = 'conic-gradient(from 0deg,transparent 0 18%,rgba(140,140,140,.4) 32%,rgba(140,140,140,.15) 55%,transparent 70%)';
+    core.style.boxShadow = 'inset 0 0 40px rgba(0,0,0,.4)';
+    core.style.borderColor = 'rgba(255,255,255,.15)';
+  }
+  statusEl.textContent = c.label;
+  statusEl.style.color = c.color;
+  qualEl.textContent = c.desc;
+  qualEl.style.color = c.color;
+}
+
+/* ---------- confetti (rơi pháo giấy khi mạnh) ---------- */
+function confetti(){
+  const colors = ['#ff416c','#ff4b2b','#ffd86f','#24c6dc','#a18cd1','#42e2ff'];
+  for(let i=0;i<70;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.animationDuration = (1.8+Math.random()*1.6) + 's';
+    c.style.animationDelay = (Math.random()*.5) + 's';
+    c.style.width = (6+Math.random()*8)+'px';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),4200);
+  }
+}
+
+/* ---------- popup ---------- */
+function showPopup(c, mbps){
+  popupBox.className = 'popup-box ' + c.cls;
+  popupEmoji.textContent = c.emoji;
+  popupTitle.textContent = c.title;
+  popupTitle.style.color = c.color;
+  popupDesc.textContent = c.desc;
+  animateNumber(popupSpeed, mbps);
+  popup.classList.add('show');
+  if(c.cls==='strong') confetti();
+}
+function animateNumber(el, target, dur=900){
+  const t0 = performance.now();
+  function step(t){
+    const p = Math.min((t-t0)/dur,1);
+    el.textContent = (target*(1-Math.pow(1-p,3))).toFixed(1);
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+popupClose.addEventListener('click',()=>popup.classList.remove('show'));
+popup.addEventListener('click',e=>{ if(e.target===popup) popup.classList.remove('show'); });
+
+/* ---------- chạy test ---------- */
+let testing = false;
+btn.addEventListener('click', async ()=>{
+  if(testing) return;
+  testing = true;
+  btn.disabled = true;
+  btn.textContent = '⏳ ĐANG KIỂM TRA...';
+  speedVal.textContent = '0';
+
+  /* bắt đầu xoay đều, vừa xoay vừa tăng dần tốc độ xoay như đang đo thật */
+  ring.style.background = 'conic-gradient(from 0deg,transparent 0 12%,rgba(140,140,200,.6) 30%,rgba(140,140,200,.2) 55%,transparent 70%)';
+  ring.style.animationDuration = '2.2s';
+  ring.style.animationPlayState = 'running';
+  core.style.boxShadow = 'inset 0 0 40px rgba(140,140,255,.25)';
+
+  statusEl.textContent = '📡 Đang đo ping...';
+  statusEl.style.color = '#fff';
+  ring.style.animationDuration = '2s';
+
+  const ping = await measurePing();
+  pingEl.textContent = (ping==='--'?'--':ping+' ms');
+  await sleep(300);
+
+  statusEl.textContent = '⬇️ Đang tải dữ liệu thật (1/3)...';
+  ring.style.animationDuration = '1.4s';
+  const mbps = await measureDownload((m,i)=>{
+    animateSpeed(m, 900);
+    statusEl.textContent = `⬇️ Đang tải dữ liệu thật (${i+2}/3)...`;
+    ring.style.animationDuration = (1.2 - i*0.15) + 's';
+  });
+
+  statusEl.textContent = '📊 Đang phân tích kết quả...';
+  ring.style.animationDuration = '3s';
+  await sleep(900);
+
+  const c = classify(mbps);
+  applyClass(c);
+  statusEl.textContent = c.label;
+  animateSpeed(mbps);
+
+  ring.style.animationPlayState = 'paused';
+  await sleep(600);
+  showPopup(c, mbps);
+
+  btn.disabled = false;
+  btn.textContent = '🔄 KIỂM TRA LẠI';
+  testing = false;
+});
+</script>
+</body>
+</html>
